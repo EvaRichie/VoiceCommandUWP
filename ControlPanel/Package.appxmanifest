@@ -4,17 +4,18 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-  IgnorableNamespaces="uap mp">
+  xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
+  IgnorableNamespaces="uap uap3 mp">
 
   <Identity
-    Name="1eb5cabc-14d1-4f32-a9d5-fc879ef69ee8"
+    Name="6eff57fe-1f5c-428d-b89a-712ec05e1d72"
     Publisher="CN=Win10Dev"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="1eb5cabc-14d1-4f32-a9d5-fc879ef69ee8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="6eff57fe-1f5c-428d-b89a-712ec05e1d72" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>VoiceCommand</DisplayName>
+    <DisplayName>ControlPanel</DisplayName>
     <PublisherDisplayName>Win10Dev</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -30,16 +31,22 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="VoiceCommand.App">
+      EntryPoint="ControlPanel.App">
       <uap:VisualElements
-        DisplayName="VoiceCommand"
+        DisplayName="ControlPanel"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="VoiceCommand"
+        Description="ControlPanel"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.appService" EntryPoint="ControlPanel.BackgroundServices.BackgroundVoiceCommandHandler">
+          <uap:AppService Name="BackgroundVoiceCommandHandler" />
+        </uap:Extension>
+        <uap:Extension Category="windows.personalAssistantLaunch" />
+      </Extensions>
     </Application>
   </Applications>
 

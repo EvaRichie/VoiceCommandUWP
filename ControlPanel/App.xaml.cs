@@ -15,7 +15,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-namespace VoiceCommand
+namespace ControlPanel
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
@@ -32,12 +32,64 @@ namespace VoiceCommand
             this.Suspending += OnSuspending;
         }
 
+        protected override void OnActivated(IActivatedEventArgs args)
+        {
+            InitializeFrame(args);
+            if (args.Kind == ActivationKind.VoiceCommand)
+            {
+                var voiceCommandArgs = args as VoiceCommandActivatedEventArgs;
+                switch (voiceCommandArgs?.Result.Confidence)
+                {
+                    case Windows.Media.SpeechRecognition.SpeechRecognitionConfidence.High:
+                    case Windows.Media.SpeechRecognition.SpeechRecognitionConfidence.Medium:
+                        System.Diagnostics.Debug.WriteLine(voiceCommandArgs.Result.RulePath.FirstOrDefault());
+                        System.Diagnostics.Debug.WriteLine(voiceCommandArgs.Result.Text);
+                        break;
+                    case Windows.Media.SpeechRecognition.SpeechRecognitionConfidence.Low:
+                    case Windows.Media.SpeechRecognition.SpeechRecognitionConfidence.Rejected:
+                        System.Diagnostics.Debug.WriteLine("Denided");
+                        break;
+                }
+            }
+        }
+
+        private void InitializeFrame(IActivatedEventArgs args)
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+
+            // Do not repeat app initialization when the Window already has content,
+            // just ensure that the window is active
+            if (rootFrame == null)
+            {
+                // Create a Frame to act as the navigation context and navigate to the first page
+                rootFrame = new Frame();
+
+                if (args.PreviousExecutionState == ApplicationExecutionState.Terminated)
+                {
+                    //TODO: Load state from previously suspended application
+                }
+
+                // Place the frame in the current Window
+                Window.Current.Content = rootFrame;
+            }
+
+            if (rootFrame.Content == null)
+            {
+                // When the navigation stack isn't restored navigate to the first page,
+                // configuring the new page by passing required information as a navigation
+                // parameter
+                rootFrame.Navigate(typeof(Views.MainPage));
+            }
+            // Ensure the current window is active
+            Window.Current.Activate();
+        }
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected async override void OnLaunched(LaunchActivatedEventArgs e)
         {
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
@@ -45,6 +97,8 @@ namespace VoiceCommand
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
+            await Library.VoiceCommandHelper.TryToRegistVoiceCommandsAsync("ms-appx:///VoiceCommands/VoiceCommandsDef_en-us.xml");
+
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -72,7 +126,7 @@ namespace VoiceCommand
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    rootFrame.Navigate(typeof(Views.MainPage), e.Arguments);
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();

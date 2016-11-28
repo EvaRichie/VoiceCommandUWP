@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<VoiceCommands xmlns="http://schemas.microsoft.com/voicecommands/1.2">
+  <CommandSet xml:lang="en-us" Name="VoiceCommandsDef_en-us">
+    <AppName>ControlPanel</AppName>
+    <Example>Interact with ControlPanel for needs</Example>
+
+    <Command Name="NavigatePageCommand">
+      <Example>Launch Main page</Example>
+      <!-- Launch controlpanel about page -->
+      <ListenFor RequireAppName="ExplicitlySpecified">Launch {builtin:AppName} about page</ListenFor>
+      <ListenFor RequireAppName="BeforeOrAfterPhrase">Launch about page</ListenFor>
+      <Feedback>Opening about page</Feedback>
+      <Navigate />
+    </Command>
+
+    <Command Name="ServiceCommand">
+      <Example>Tell me a fact</Example>
+      <!-- controlpanel tell me a fact -->
+      <ListenFor RequireAppName="ExplicitlySpecified">{builtin:AppName} tell me a fact</ListenFor>
+      <ListenFor>Tell me a funny fact</ListenFor>
+      <Feedback>Get ready</Feedback>
+      <VoiceCommandService Target="BackgroundVoiceCommandHandler"/>
+    </Command>
+  </CommandSet>
+</VoiceCommands>
+
