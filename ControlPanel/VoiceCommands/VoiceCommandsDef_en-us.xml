@@ -14,10 +14,11 @@
     </Command>
 
     <Command Name="ServiceCommand">
-      <Example>Tell me a fact</Example>
+      <Example>Roll me a dice</Example>
       <!-- controlpanel tell me a fact -->
-      <ListenFor RequireAppName="ExplicitlySpecified">{builtin:AppName} tell me a fact</ListenFor>
-      <ListenFor>Tell me a funny fact</ListenFor>
+      <!-- controlpanel roll me a dice -->
+      <ListenFor RequireAppName="ExplicitlySpecified">{builtin:AppName} roll me a dice</ListenFor>
+      <ListenFor>roll me a dice for fun</ListenFor>
       <Feedback>Get ready</Feedback>
       <VoiceCommandService Target="BackgroundVoiceCommandHandler"/>
     </Command>

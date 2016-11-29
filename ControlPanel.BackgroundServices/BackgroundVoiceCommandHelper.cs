@@ -10,11 +10,6 @@ namespace ControlPanel.BackgroundServices
 {
     public sealed class BackgroundVoiceCommandHelper
     {
-        public static IAsyncAction ReportProgressAsync(VoiceCommandServiceConnection connection, string message)
-        {
-            return AsyncReportProgress(connection, message, message).AsAsyncAction();
-        }
-
         public static IAsyncAction ReportProgressAsync(VoiceCommandServiceConnection connection, string spokenMessage, string displayMessage)
         {
             return AsyncReportProgress(connection, spokenMessage, displayMessage).AsAsyncAction();
@@ -25,6 +20,18 @@ namespace ControlPanel.BackgroundServices
             var responseMsg = new VoiceCommandUserMessage { SpokenMessage = spokenMessage, DisplayMessage = displayMessage };
             var response = VoiceCommandResponse.CreateResponse(responseMsg);
             await connection.ReportProgressAsync(response);
+        }
+
+        public static IAsyncAction ReportSuccessAsync(VoiceCommandServiceConnection connection, string spokenMessage, string displayMessage, IEnumerable<VoiceCommandContentTile> contentTiles)
+        {
+            return AsyncReportSuccess(connection, spokenMessage, displayMessage, contentTiles).AsAsyncAction();
+        }
+
+        private static async Task AsyncReportSuccess(VoiceCommandServiceConnection connection, string spokenMessage, string displayMessage, IEnumerable<VoiceCommandContentTile> contentTiles)
+        {
+            var responseMsg = new VoiceCommandUserMessage { SpokenMessage = spokenMessage, DisplayMessage = displayMessage };
+            var response = VoiceCommandResponse.CreateResponse(responseMsg, contentTiles);
+            await connection.ReportSuccessAsync(response);
         }
     }
 }

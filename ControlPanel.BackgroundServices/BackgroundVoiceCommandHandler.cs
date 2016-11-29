@@ -14,6 +14,8 @@ namespace ControlPanel.BackgroundServices
     {
         private BackgroundTaskDeferral deferral;
         private VoiceCommandServiceConnection voiceServiceConn;
+        private VoiceCommandResponse response;
+
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
             deferral = taskInstance.GetDeferral();
@@ -43,7 +45,31 @@ namespace ControlPanel.BackgroundServices
 
         private async Task HandleAsync(SpeechRecognitionSemanticInterpretation interpretation)
         {
-            await BackgroundVoiceCommandHelper.ReportProgressAsync(voiceServiceConn, "Repot progress", "Try to do!");
+            //await BackgroundVoiceCommandHelper.ReportProgressAsync(voiceServiceConn, "Repot progress", "Try to do!");
+            response = VoiceCommandResponse.CreateResponse(new VoiceCommandUserMessage() { SpokenMessage = "Get ready", DisplayMessage = "Get ready" });
+            await voiceServiceConn.ReportProgressAsync(response);
+            await Task.Delay(500);
+            var random = new Random((int)DateTime.UtcNow.Ticks);
+            var randomInt = (random.Next() % 6) + 1;
+            var contentTiles = new List<VoiceCommandContentTile>();
+            var tile = new VoiceCommandContentTile();
+            try
+            {
+                tile.ContentTileType = VoiceCommandContentTileType.TitleWith68x68IconAndText;
+                tile.Image = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(new Uri($"ms-appx:///ControlPanel.BackgroundServices/Assets/Dice_{randomInt}.png"));
+                tile.AppContext = null;
+                tile.AppLaunchArgument = "type=" + randomInt;
+                tile.Title = $"The dice result is {randomInt}";
+                contentTiles.Add(tile);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
+
+            response = VoiceCommandResponse.CreateResponse(new VoiceCommandUserMessage() { DisplayMessage = "Result is", SpokenMessage = $"{randomInt}" }, contentTiles);
+            await voiceServiceConn.ReportSuccessAsync(response);
+            //await BackgroundVoiceCommandHelper.ReportSuccessAsync(voiceServiceConn, "GG", $"Success {randomInt}", contentTiles);
         }
     }
 }
