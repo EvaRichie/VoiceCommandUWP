@@ -7,9 +7,9 @@ using Windows.ApplicationModel.VoiceCommands;
 using Windows.Foundation;
 using Windows.Storage;
 
-namespace ControlPanel.Library
+namespace ControlPanel.Library.Helpers
 {
-    public class VoiceCommandHelper
+    public sealed class VoiceCommandHelper
     {
         public static IAsyncAction TryToRegistVoiceCommandsAsync(string fileNameOrPath)
         {

@@ -109,16 +109,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BackgroundVoiceCommandHandler.cs" />
-    <Compile Include="BackgroundVoiceCommandHelper.cs" />
+    <Compile Include="Helpers\VoiceCommandResponseHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Dice_1.png" />
-    <Content Include="Assets\Dice_2.png" />
-    <Content Include="Assets\Dice_3.png" />
-    <Content Include="Assets\Dice_4.png" />
-    <Content Include="Assets\Dice_5.png" />
-    <Content Include="Assets\Dice_6.png" />
+    <Content Include="Assets\68_Dice_1.png" />
+    <Content Include="Assets\68_Dice_2.png" />
+    <Content Include="Assets\68_Dice_3.png" />
+    <Content Include="Assets\68_Dice_4.png" />
+    <Content Include="Assets\68_Dice_5.png" />
+    <Content Include="Assets\68_Dice_6.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ControlPanel.Library\ControlPanel.Library.csproj">
+      <Project>{e9d6e778-de62-4279-92d1-d24f8e8d6439}</Project>
+      <Name>ControlPanel.Library</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

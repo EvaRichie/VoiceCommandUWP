@@ -25,8 +25,17 @@ namespace ControlPanel.BackgroundServices
                 var triggerDetails = taskInstance.TriggerDetails as AppServiceTriggerDetails;
                 voiceServiceConn = VoiceCommandServiceConnection.FromAppServiceTriggerDetails(triggerDetails);
                 var command = await voiceServiceConn?.GetVoiceCommandAsync();
-                System.Diagnostics.Debug.WriteLine(command.CommandName);
-                await HandleAsync(command.SpeechRecognitionResult.SemanticInterpretation);
+                switch (command.CommandName)
+                {
+                    case "RollCommand":
+                        await ServiceCommandHandleAsync(command.SpeechRecognitionResult.SemanticInterpretation);
+                        break;
+                    case "ShowAllCommand":
+                        await FindCommandHandleAsync(command.SpeechRecognitionResult.SemanticInterpretation);
+                        break;
+                    default:
+                        break;
+                }
             }
             catch (Exception ex)
             {
@@ -43,22 +52,20 @@ namespace ControlPanel.BackgroundServices
             deferral?.Complete();
         }
 
-        private async Task HandleAsync(SpeechRecognitionSemanticInterpretation interpretation)
+        private async Task ServiceCommandHandleAsync(SpeechRecognitionSemanticInterpretation interpretation)
         {
-            //await BackgroundVoiceCommandHelper.ReportProgressAsync(voiceServiceConn, "Repot progress", "Try to do!");
-            response = VoiceCommandResponse.CreateResponse(new VoiceCommandUserMessage() { SpokenMessage = "Get ready", DisplayMessage = "Get ready" });
-            await voiceServiceConn.ReportProgressAsync(response);
-            await Task.Delay(500);
-            var random = new Random((int)DateTime.UtcNow.Ticks);
-            var randomInt = (random.Next() % 6) + 1;
+            var progressMessage = "Get ready";
+            await Helpers.VoiceCommandResponseHelper.ReportProgressAsync(voiceServiceConn, progressMessage, progressMessage);
+            var randomInt = new Random((int)DateTime.UtcNow.Ticks).Next() % 6 + 1;
+            System.Diagnostics.Debug.WriteLine(randomInt);
             var contentTiles = new List<VoiceCommandContentTile>();
             var tile = new VoiceCommandContentTile();
             try
             {
                 tile.ContentTileType = VoiceCommandContentTileType.TitleWith68x68IconAndText;
-                tile.Image = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(new Uri($"ms-appx:///ControlPanel.BackgroundServices/Assets/Dice_{randomInt}.png"));
-                tile.AppContext = null;
-                tile.AppLaunchArgument = "type=" + randomInt;
+                tile.Image = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(new Uri($"ms-appx:///ControlPanel.BackgroundServices/Assets/68_Dice_{randomInt}.png"));
+                tile.AppContext = randomInt;
+                tile.AppLaunchArgument = "DiceResult=" + randomInt;
                 tile.Title = $"The dice result is {randomInt}";
                 contentTiles.Add(tile);
             }
@@ -67,9 +74,75 @@ namespace ControlPanel.BackgroundServices
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
-            response = VoiceCommandResponse.CreateResponse(new VoiceCommandUserMessage() { DisplayMessage = "Result is", SpokenMessage = $"{randomInt}" }, contentTiles);
-            await voiceServiceConn.ReportSuccessAsync(response);
-            //await BackgroundVoiceCommandHelper.ReportSuccessAsync(voiceServiceConn, "GG", $"Success {randomInt}", contentTiles);
+            var successMessage = $"You got {randomInt}";
+            await Helpers.VoiceCommandResponseHelper.ReportSuccessAsync(voiceServiceConn, successMessage, successMessage, contentTiles);
+        }
+
+        private async Task FindCommandHandleAsync(SpeechRecognitionSemanticInterpretation interpretation)
+        {
+            var searchQuery = string.Empty;
+            if (interpretation.Properties.ContainsKey("DiceNum"))
+                searchQuery = interpretation.Properties["DiceNum"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(searchQuery) && !string.IsNullOrWhiteSpace(searchQuery))
+            {
+                response = VoiceCommandResponse.CreateResponse(new VoiceCommandUserMessage() { SpokenMessage = "Get ready", DisplayMessage = "Get ready" });
+                await voiceServiceConn.ReportProgressAsync(response);
+                //await DisambiguateAsync("Select a result", "Please select a result");
+                var promptStr = "Select a result";
+                var repromptStr = "Please select a result";
+                var contentTiles = new List<VoiceCommandContentTile>();
+                for (var i = 1; i < 7; i++)
+                {
+                    var tile = new VoiceCommandContentTile();
+                    tile.ContentTileType = VoiceCommandContentTileType.TitleWith68x68IconAndText;
+                    tile.Image = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(new Uri($"ms-appx:///ControlPanel.BackgroundServices/Assets/68_Dice_{i}.png"));
+                    tile.AppContext = i;
+                    tile.AppLaunchArgument = $"type={i}";
+                    tile.Title = $"The dice result is {i}";
+                    contentTiles.Add(tile);
+                }
+                var result = await Helpers.VoiceCommandResponseHelper.RequestDisambiguationAsync(voiceServiceConn, promptStr, repromptStr, contentTiles);
+                if (result != null)
+                {
+                    contentTiles.Clear();
+                    contentTiles.Add(result.SelectedItem);
+                    var successStr = "You select a dice";
+                    await Helpers.VoiceCommandResponseHelper.ReportSuccessAsync(voiceServiceConn, successStr, successStr, contentTiles);
+                }
+            }
+
+        }
+
+        private async Task DisambiguateAsync(string promptMessage, string repromptMessage)
+        {
+            var prompt = new VoiceCommandUserMessage();
+            prompt.DisplayMessage = prompt.SpokenMessage = promptMessage;
+            var reprompt = new VoiceCommandUserMessage();
+            reprompt.DisplayMessage = reprompt.SpokenMessage = repromptMessage;
+            var contentTiles = new List<VoiceCommandContentTile>();
+            for (var i = 1; i < 7; i++)
+            {
+                var tile = new VoiceCommandContentTile();
+                tile.ContentTileType = VoiceCommandContentTileType.TitleWith68x68IconAndText;
+                tile.Image = await Windows.Storage.StorageFile.GetFileFromApplicationUriAsync(new Uri($"ms-appx:///ControlPanel.BackgroundServices/Assets/68_Dice_{i}.png"));
+                tile.AppContext = i;
+                tile.AppLaunchArgument = $"type={i}";
+                tile.Title = $"The dice result is {i}";
+                contentTiles.Add(tile);
+            }
+            response = VoiceCommandResponse.CreateResponseForPrompt(prompt, reprompt, contentTiles);
+            try
+            {
+                var result = await voiceServiceConn.RequestDisambiguationAsync(response);
+                if (result != null)
+                {
+                    System.Diagnostics.Debug.WriteLine(result);
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
     }
 }

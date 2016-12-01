@@ -13,15 +13,26 @@
       <Navigate />
     </Command>
 
-    <Command Name="ServiceCommand">
+    <Command Name="RollCommand">
       <Example>Roll me a dice</Example>
-      <!-- controlpanel tell me a fact -->
       <!-- controlpanel roll me a dice -->
-      <ListenFor RequireAppName="ExplicitlySpecified">{builtin:AppName} roll me a dice</ListenFor>
+      <ListenFor RequireAppName="ExplicitlySpecified">{builtin:AppName} roll [me] [a] dice</ListenFor>
       <ListenFor>roll me a dice for fun</ListenFor>
       <Feedback>Get ready</Feedback>
       <VoiceCommandService Target="BackgroundVoiceCommandHandler"/>
     </Command>
+
+    <Command Name="ShowAllCommand">
+      <Example>Show all dice</Example>
+      <!-- controlpanel show all dice -->
+      <ListenFor>Show all {DiceNum}</ListenFor>
+      <Feedback>Looking for all {DiceNum}</Feedback>
+      <VoiceCommandService Target="BackgroundVoiceCommandHandler"/>
+    </Command>
+    
+    
+
+    <PhraseTopic Label="DiceNum" Scenario="Dictation"/>
   </CommandSet>
 </VoiceCommands>
 

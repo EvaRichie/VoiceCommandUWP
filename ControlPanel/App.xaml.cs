@@ -97,7 +97,7 @@ namespace ControlPanel
                 this.DebugSettings.EnableFrameRateCounter = true;
             }
 #endif
-            await Library.VoiceCommandHelper.TryToRegistVoiceCommandsAsync("ms-appx:///VoiceCommands/VoiceCommandsDef_en-us.xml");
+            await Library.Helpers.VoiceCommandHelper.TryToRegistVoiceCommandsAsync("ms-appx:///VoiceCommands/VoiceCommandsDef_en-us.xml");
 
             Frame rootFrame = Window.Current.Content as Frame;
 
